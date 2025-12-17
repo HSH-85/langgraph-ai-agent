@@ -58,6 +58,23 @@ else:
     print("\n⚠️ TAVILY_API_KEY가 설정되지 않았습니다.")
     print("   웹 검색 기능이 작동하지 않습니다.")
 
+# Cohere API 키 확인
+cohere_key = os.getenv("COHERE_API_KEY")
+if cohere_key:
+    key_preview = cohere_key[:10] + "..." + cohere_key[-4:] if len(cohere_key) > 14 else "***"
+    print(f"\n✅ COHERE_API_KEY: {key_preview}")
+    
+    # Cohere API 테스트
+    try:
+        import cohere
+        client = cohere.Client(api_key=cohere_key)
+        print("✅ Cohere API 클라이언트 초기화 성공!")
+    except Exception as e:
+        print(f"⚠️ Cohere API 클라이언트 초기화 오류: {e}")
+else:
+    print("\n⚠️ COHERE_API_KEY가 설정되지 않았습니다.")
+    print("   리랭크 기능이 작동하지 않습니다.")
+
 print("\n" + "=" * 50)
 print("확인 완료")
 print("=" * 50)

@@ -5,6 +5,7 @@ LangGraph를 기반으로 한 RAG(Retrieval-Augmented Generation) 에이전트�
 ## ✨ 주요 기능
 
 - **🔍 벡터 스토어 검색**: ChromaDB를 사용한 문서 검색
+- **🎯 리랭크**: Cohere를 사용한 문서 재정렬 (관련성 순 정렬)
 - **🌐 웹 검색**: Tavily를 통한 실시간 웹 검색
 - **📝 답변 생성**: OpenAI GPT 모델을 사용한 답변 생성
 - **💬 대화형 UI**: Streamlit 기반 사용자 인터페이스
@@ -61,11 +62,13 @@ pip install -r requirements.txt
 ```env
 OPENAI_API_KEY=your_openai_api_key_here
 TAVILY_API_KEY=your_tavily_api_key_here
+COHERE_API_KEY=your_cohere_api_key_here
 ```
 
 **API 키 발급:**
 - OpenAI API 키: https://platform.openai.com/api-keys
 - Tavily API 키: https://tavily.com (웹 검색용, 선택사항)
+- Cohere API 키: https://cohere.com (리랭크용, 선택사항)
 
 ### 5. API 키 확인 (선택사항)
 
@@ -116,6 +119,7 @@ retriever = load_pdf_to_vectorstore("path/to/document.pdf")
 |--------|------|----------|
 | `OPENAI_API_KEY` | OpenAI API 키 | ✅ 필수 |
 | `TAVILY_API_KEY` | Tavily API 키 (웹 검색용) | ⚠️ 선택 |
+| `COHERE_API_KEY` | Cohere API 키 (리랭크용) | ⚠️ 선택 |
 
 ## 🌐 배포 방법
 
