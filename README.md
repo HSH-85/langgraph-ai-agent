@@ -28,8 +28,8 @@ aiAgent/
 ### 1. 저장소 클론 또는 다운로드
 
 ```bash
-git clone <repository-url>
-cd aiAgent
+git clone https://github.com/HSH-85/langgraph-ai-agent.git
+cd langgraph-ai-agent
 ```
 
 또는 ZIP 파일을 다운로드하여 압축 해제
@@ -168,4 +168,3 @@ pip install --upgrade -r requirements.txt
 
 **만든이**: LangGraph RAG 에이전트  
 **버전**: 1.0.0
-
