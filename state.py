@@ -53,9 +53,52 @@ class AgentState(TypedDict):
     """웹 검색 필요 여부 (기존 web_search와 호환)"""
     
     loop_count: int
-    """무한 루프 방지용 재시도 카운터 (최대 3회)"""
+    """무한 루프 방지용 재시도 카운터 (금융 특화: 최대 7회)"""
     
-    # ========== 5. UI/UX 및 모니터링 ==========
+    # ========== 5. 금융 특화 필드 ==========
+    search_round: int
+    """검색 라운드 수 (최대 3라운드까지 여러 번 검색)"""
+    
+    verification_round: int
+    """검증 라운드 수 (최대 2라운드까지 여러 번 검증)"""
+    
+    financial_domain: Optional[str]
+    """금융 도메인 분류
+    - 'stock': 주식, 주가, 기업 분석
+    - 'bond': 채권, 이자율
+    - 'forex': 외환, 환율
+    - 'real_estate': 부동산
+    - 'interest_rate': 금리, 기준금리
+    - 'derivative': 파생상품, 옵션, 선물
+    - 'crypto': 암호화폐, 가상자산
+    - 'economic': 경제 지표, GDP, 인플레이션
+    - 'general': 일반 금융
+    """
+    
+    confidence_score: Optional[float]
+    """답변 신뢰도 점수 (0.0 ~ 1.0)"""
+    
+    source_agreement: Optional[str]
+    """소스 간 일치도 ('high', 'medium', 'low')"""
+    
+    cross_validation_results: List[dict]
+    """크로스 검증 결과 리스트"""
+    
+    additional_search_queries: List[str]
+    """추가 검색 쿼리 리스트 (다중 검색 라운드용)"""
+    
+    company_comparison_data: Optional[dict]
+    """회사 비교 분석 데이터
+    {
+        "target_company": "회사명",
+        "industry": "업종",
+        "market_cap": "시가총액 규모",
+        "similar_companies": ["비슷한 회사 목록"],
+        "comparison_insights": "비교 분석 인사이트"
+    }
+    """
+    
+    # ========== 6. UI/UX 및 모니터링 ==========
     current_step: Optional[str]
     """현재 에이전트 실행 단계 (UI 표시용)
     예: '의도 분석 중...', '문서 검색 중...', '답변 생성 중...'
