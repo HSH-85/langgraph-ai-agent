@@ -17,8 +17,8 @@ st.set_page_config(
 )
 
 # 제목
-st.title("🤖 고도화된 LangGraph RAG 에이전트")
-st.markdown("*의도 분석 · 리랭크 · 사고 과정 추적 기능 포함*")
+st.title("💰 금융 특화 LangGraph RAG 에이전트")
+st.markdown("*금융 도메인 분석 · 다중 검색/검증 · 신뢰도 기반 답변 생성*")
 st.markdown("---")
 
 # 세션 상태 초기화
@@ -81,9 +81,10 @@ for idx, message in enumerate(st.session_state.messages):
                     for thought in metadata["thought_process"]:
                         st.caption(thought)
             
-            # 메타 정보 표시
+            # 메타 정보 표시 (금융 특화)
             if show_meta:
                 with st.expander("📊 메타 정보 보기"):
+                    # 기본 정보
                     col1, col2, col3 = st.columns(3)
                     with col1:
                         st.metric("의도", metadata.get("intent", "N/A"))
@@ -91,6 +92,33 @@ for idx, message in enumerate(st.session_state.messages):
                         st.metric("관련성", metadata.get("is_relevant", "N/A"))
                     with col3:
                         st.metric("문서 수", metadata.get("doc_count", 0))
+                    
+                    # 금융 특화 정보
+                    domain_kr = {
+                        'stock': '주식', 'bond': '채권', 'forex': '외환',
+                        'real_estate': '부동산', 'interest_rate': '금리',
+                        'derivative': '파생상품', 'crypto': '암호화폐',
+                        'economic': '경제 지표', 'general': '일반 금융'
+                    }
+                    financial_domain = metadata.get("financial_domain")
+                    if financial_domain:
+                        st.markdown(f"**💰 금융 도메인**: {domain_kr.get(financial_domain, financial_domain)}")
+                    
+                    confidence_score = metadata.get("confidence_score")
+                    if confidence_score is not None:
+                        st.markdown(f"**📊 신뢰도**: {confidence_score:.2%}")
+                        st.progress(confidence_score)
+                    
+                    source_agreement = metadata.get("source_agreement")
+                    if source_agreement:
+                        agreement_kr = {"high": "높음", "medium": "보통", "low": "낮음"}
+                        st.markdown(f"**🔄 소스 일치도**: {agreement_kr.get(source_agreement, source_agreement)}")
+                    
+                    col4, col5 = st.columns(2)
+                    with col4:
+                        st.caption(f"🔍 검색 라운드: {metadata.get('search_round', 0)}")
+                    with col5:
+                        st.caption(f"✅ 검증 라운드: {metadata.get('verification_round', 0)}")
                     
                     if metadata.get("loop_count", 0) > 0:
                         st.caption(f"🔄 재시도 횟수: {metadata['loop_count']}")
@@ -110,7 +138,16 @@ if prompt := st.chat_input("질문을 입력하세요..."):
         status_placeholder = st.empty()
         
         with st.spinner("답변을 생성하는 중..."):
-            result = run_agent(prompt, st.session_state.graph)
+            # 이전 메시지를 BaseMessage 형식으로 변환
+            from langchain_core.messages import HumanMessage, AIMessage
+            previous_messages = []
+            for msg in st.session_state.messages:
+                if msg["role"] == "user":
+                    previous_messages.append(HumanMessage(content=msg["content"]))
+                elif msg["role"] == "assistant":
+                    previous_messages.append(AIMessage(content=msg["content"]))
+            
+            result = run_agent(prompt, st.session_state.graph, previous_messages=previous_messages)
             
             # 최종 답변 추출
             if result.get("messages"):
@@ -125,14 +162,20 @@ if prompt := st.chat_input("질문을 입력하세요..."):
             status_placeholder.empty()
             st.markdown(answer)
             
-            # 메타데이터 수집
+            # 메타데이터 수집 (금융 특화 필드 포함)
             metadata = {
                 "intent": result.get("intent"),
                 "is_relevant": result.get("is_relevant"),
                 "doc_count": len(result.get("documents", [])),
                 "loop_count": result.get("loop_count", 0),
                 "web_search_used": result.get("loop_count", 0) > 0,
-                "thought_process": result.get("thought_process", [])
+                "thought_process": result.get("thought_process", []),
+                # 금융 특화 필드
+                "financial_domain": result.get("financial_domain"),
+                "confidence_score": result.get("confidence_score"),
+                "source_agreement": result.get("source_agreement"),
+                "search_round": result.get("search_round", 0),
+                "verification_round": result.get("verification_round", 0)
             }
             
             # 사고 과정 표시
@@ -141,9 +184,10 @@ if prompt := st.chat_input("질문을 입력하세요..."):
                     for thought in metadata["thought_process"]:
                         st.caption(thought)
             
-            # 메타 정보 표시
+            # 메타 정보 표시 (금융 특화)
             if show_meta:
                 with st.expander("📊 메타 정보 보기"):
+                    # 기본 정보
                     col1, col2, col3 = st.columns(3)
                     with col1:
                         st.metric("의도", metadata.get("intent", "N/A"))
@@ -151,6 +195,33 @@ if prompt := st.chat_input("질문을 입력하세요..."):
                         st.metric("관련성", metadata.get("is_relevant", "N/A"))
                     with col3:
                         st.metric("문서 수", metadata.get("doc_count", 0))
+                    
+                    # 금융 특화 정보
+                    domain_kr = {
+                        'stock': '주식', 'bond': '채권', 'forex': '외환',
+                        'real_estate': '부동산', 'interest_rate': '금리',
+                        'derivative': '파생상품', 'crypto': '암호화폐',
+                        'economic': '경제 지표', 'general': '일반 금융'
+                    }
+                    financial_domain = metadata.get("financial_domain")
+                    if financial_domain:
+                        st.markdown(f"**💰 금융 도메인**: {domain_kr.get(financial_domain, financial_domain)}")
+                    
+                    confidence_score = metadata.get("confidence_score")
+                    if confidence_score is not None:
+                        st.markdown(f"**📊 신뢰도**: {confidence_score:.2%}")
+                        st.progress(confidence_score)
+                    
+                    source_agreement = metadata.get("source_agreement")
+                    if source_agreement:
+                        agreement_kr = {"high": "높음", "medium": "보통", "low": "낮음"}
+                        st.markdown(f"**🔄 소스 일치도**: {agreement_kr.get(source_agreement, source_agreement)}")
+                    
+                    col4, col5 = st.columns(2)
+                    with col4:
+                        st.caption(f"🔍 검색 라운드: {metadata.get('search_round', 0)}")
+                    with col5:
+                        st.caption(f"✅ 검증 라운드: {metadata.get('verification_round', 0)}")
                     
                     if metadata.get("loop_count", 0) > 0:
                         st.caption(f"🔄 재시도 횟수: {metadata['loop_count']}")
@@ -175,8 +246,8 @@ st.markdown("---")
 st.markdown(
     """
     <div style='text-align: center; color: gray;'>
-        <p>고도화된 LangGraph RAG 에이전트 | Powered by OpenAI, Tavily & Cohere</p>
-        <p style='font-size: 0.8em;'>의도 분석 · 리랭크 · 루프 제어 · 사고 과정 추적</p>
+        <p>💰 금융 특화 LangGraph RAG 에이전트 | Powered by OpenAI, Tavily & Cohere</p>
+        <p style='font-size: 0.8em;'>금융 도메인 분석 · 다중 검색/검증 · 신뢰도 기반 답변 · 사고 과정 추적</p>
     </div>
     """,
     unsafe_allow_html=True
