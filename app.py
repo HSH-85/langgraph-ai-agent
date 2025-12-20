@@ -138,16 +138,28 @@ if prompt := st.chat_input("질문을 입력하세요..."):
         status_placeholder = st.empty()
         
         with st.spinner("답변을 생성하는 중..."):
-            # 이전 메시지를 BaseMessage 형식으로 변환
+            # 이전 메시지를 BaseMessage 형식으로 변환 (현재 메시지 제외)
             from langchain_core.messages import HumanMessage, AIMessage
             previous_messages = []
-            for msg in st.session_state.messages:
+            # 현재 메시지를 제외한 이전 메시지만 변환
+            for msg in st.session_state.messages[:-1]:  # 마지막 메시지(현재 사용자 메시지) 제외
                 if msg["role"] == "user":
                     previous_messages.append(HumanMessage(content=msg["content"]))
                 elif msg["role"] == "assistant":
                     previous_messages.append(AIMessage(content=msg["content"]))
             
-            result = run_agent(prompt, st.session_state.graph, previous_messages=previous_messages)
+            try:
+                result = run_agent(prompt, st.session_state.graph, previous_messages=previous_messages)
+            except Exception as e:
+                st.error(f"에러가 발생했습니다: {str(e)}")
+                st.exception(e)
+                result = None
+            
+            # result가 None이면 에러 메시지 표시 후 종료
+            if result is None:
+                status_placeholder.empty()
+                st.error("답변을 생성할 수 없습니다. 에러 로그를 확인해주세요.")
+                st.stop()
             
             # 최종 답변 추출
             if result.get("messages"):
@@ -229,7 +241,7 @@ if prompt := st.chat_input("질문을 입력하세요..."):
                         st.caption("🌐 웹 검색 사용됨")
     
     # 어시스턴트 메시지 추가 (메타데이터 포함)
-    if result.get("messages"):
+    if result and result.get("messages"):
         last_message = result["messages"][-1]
         if hasattr(last_message, 'content'):
             answer_content = last_message.content

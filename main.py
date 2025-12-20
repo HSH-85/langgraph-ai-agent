@@ -178,9 +178,14 @@ def run_agent(question: str, graph=None, previous_messages=None):
     if previous_messages is None:
         previous_messages = []
     
+    # 현재 질문을 HumanMessage로 추가
+    from langchain_core.messages import HumanMessage
+    current_message = HumanMessage(content=question)
+    
     # 고도화된 초기 상태 설정 (이전 메시지 포함, 금융 특화 필드 포함)
+    # messages 필드는 LangGraph가 자동으로 누적하므로, 이전 메시지만 포함
     initial_state = {
-        "messages": previous_messages,  # 이전 대화 기록 포함
+        "messages": previous_messages + [current_message],  # 이전 대화 기록 + 현재 질문
         "question": question,
         "intent": None,
         "documents": [],
@@ -204,7 +209,15 @@ def run_agent(question: str, graph=None, previous_messages=None):
     
     # 그래프 실행 (재귀 제한 설정: 최대 50회)
     config = {"recursion_limit": 50}
-    result = graph.invoke(initial_state, config=config)
+    try:
+        result = graph.invoke(initial_state, config=config)
+    except Exception as e:
+        # 에러 발생 시 상세 정보 출력
+        import traceback
+        print(f"에러 발생: {e}")
+        print(f"에러 타입: {type(e)}")
+        traceback.print_exc()
+        raise
     
     return result
 
